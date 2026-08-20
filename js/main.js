@@ -158,9 +158,78 @@ function initRecommendationEngine() {
   // State Views
   const progressState = document.getElementById('demo-analysis-progress');
   const resultsState = document.getElementById('demo-results-dashboard');
+  const dragHint = document.getElementById('drag-hint');
 
   let activeMediaElement = imgPreview;
   let webcamStream = null;
+
+  // --- Draggable image position state ---
+  let imgPosX = 50, imgPosY = 15;
+  let isDragging = false, dragStartX = 0, dragStartY = 0;
+
+  function showDragHint() {
+    if (!dragHint) return;
+    dragHint.classList.remove('visible');
+    void dragHint.offsetWidth; // reflow to restart animation
+    dragHint.classList.add('visible');
+    setTimeout(() => dragHint.classList.remove('visible'), 2900);
+  }
+
+  function applyImgPosition() {
+    imgPreview.style.objectPosition = `${imgPosX}% ${imgPosY}%`;
+  }
+
+  // Mouse drag on viewport
+  viewport.addEventListener('mousedown', (e) => {
+    if (imgPreview.style.display === 'none') return;
+    isDragging = true;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    imgPreview.classList.add('is-dragging');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    imgPosX = Math.max(0, Math.min(100, imgPosX - dx * 0.13));
+    imgPosY = Math.max(0, Math.min(100, imgPosY - dy * 0.13));
+    applyImgPosition();
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    imgPreview.classList.remove('is-dragging');
+  });
+
+  // Touch drag on viewport (mobile)
+  viewport.addEventListener('touchstart', (e) => {
+    if (imgPreview.style.display === 'none') return;
+    const t = e.touches[0];
+    isDragging = true;
+    dragStartX = t.clientX;
+    dragStartY = t.clientY;
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const t = e.touches[0];
+    const dx = t.clientX - dragStartX;
+    const dy = t.clientY - dragStartY;
+    imgPosX = Math.max(0, Math.min(100, imgPosX - dx * 0.13));
+    imgPosY = Math.max(0, Math.min(100, imgPosY - dy * 0.13));
+    applyImgPosition();
+    dragStartX = t.clientX;
+    dragStartY = t.clientY;
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchend', () => { isDragging = false; });
 
   // Initialize with first sample preset photo
   if (presetThumbs.length > 0) {
@@ -217,8 +286,27 @@ function initRecommendationEngine() {
       stopWebcamStream();
       activeMediaElement = imgPreview;
       presetThumbs.forEach(t => t.classList.remove('active'));
+      // Auto-position face to top area for portrait uploads
+      imgPreview.onload = () => autoPositionFace(imgPreview);
     };
     reader.readAsDataURL(file);
+  }
+
+  // Smart face positioning: analyze image aspect ratio and set initial position
+  function autoPositionFace(img) {
+    const naturalW = img.naturalWidth  || 1;
+    const naturalH = img.naturalHeight || 1;
+    const ratio = naturalH / naturalW;
+
+    if (ratio > 1.2) {
+      imgPosX = 50; imgPosY = 8;   // portrait — face at very top
+    } else if (ratio > 0.9) {
+      imgPosX = 50; imgPosY = 20;  // square-ish
+    } else {
+      imgPosX = 50; imgPosY = 50;  // landscape — center
+    }
+    applyImgPosition();
+    showDragHint(); // show "drag to reposition" tip
   }
 
   async function startWebcamStream() {
@@ -275,6 +363,7 @@ function initRecommendationEngine() {
     placeholder.style.display = 'none';
     videoElement.style.display = 'none';
     activeMediaElement = imgPreview;
+    imgPreview.onload = () => autoPositionFace(imgPreview);
   }
 
   // --- TRIGGER MULTI-FACTOR ANALYSIS ---
