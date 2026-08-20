@@ -146,7 +146,8 @@
                   <label class="form-label" for="env-location">Your Location / City:</label>
                   <div class="input-with-icon">
                     <span class="input-icon">&#128205;</span>
-                    <input type="text" id="env-location" class="custom-input" value="Colombo, Sri Lanka" placeholder="e.g. Colombo, Kandy, Tokyo, London">
+                    <input type="text" id="env-location" class="custom-input" value="Colombo, Sri Lanka" placeholder="Type city or district (e.g. Anuradhapura, Kandy, Jaffna...)" autocomplete="off">
+                    <div class="location-dropdown" id="location-dropdown"></div>
                   </div>
                 </div>
 
@@ -450,6 +451,7 @@
 
   <!-- Custom Scripts -->
   <script src="assets/svg-assets.js"></script>
+  <script src="js/locations.js"></script>
   <script src="js/model.js"></script>
   <script src="js/main.js"></script>
 </body>

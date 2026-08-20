@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initRecommendationEngine();
   initModelStatusTracker();
   initPrintPrescription();
+  if (typeof initLocationAutocomplete === 'function') initLocationAutocomplete();
 });
 
 /* ==========================================================================
