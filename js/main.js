@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initEnvironmentalControls();
   initRecommendationEngine();
   initModelStatusTracker();
+  initPrintPrescription();
 });
 
 /* ==========================================================================
@@ -439,5 +440,130 @@ function initModelStatusTracker() {
       toast.style.display = 'block';
       setTimeout(() => { toast.style.display = 'none'; }, 2800);
     }
+  });
+}
+
+/* ==========================================================================
+   6. PRINT BEAUTY PRESCRIPTION MODAL
+   ========================================================================== */
+function initPrintPrescription() {
+  const btnPrint = document.getElementById('btn-print-prescription');
+  const overlay  = document.getElementById('print-modal-overlay');
+  const btnConfirmPrint = document.getElementById('btn-confirm-print');
+  const btnClose = document.getElementById('btn-close-print-modal');
+
+  if (!btnPrint || !overlay) return;
+
+  // --- Open Modal & Populate Prescription ---
+  btnPrint.addEventListener('click', () => {
+    // Gather rendered results from the dashboard
+    const scoreNum   = document.getElementById('res-score-num')?.innerText  || '--';
+    const scoreLabel = document.getElementById('res-score-label')?.innerText || '';
+    const skinType   = document.getElementById('res-skin-type')?.innerText  || '';
+    const condition  = document.getElementById('res-condition')?.innerText  || '';
+    const envTitle   = document.getElementById('res-env-title')?.innerText  || '';
+    const envDesc    = document.getElementById('res-env-desc')?.innerText   || '';
+    const location   = document.getElementById('env-location')?.value       || '';
+    const weather    = document.getElementById('env-weather')?.value        || '';
+    const humidity   = document.getElementById('env-humidity')?.value       || '';
+    const temp       = document.getElementById('env-temp')?.value           || '';
+
+    // Get routine lists by cloning rendered HTML
+    const morningItems = document.querySelectorAll('#res-morning-list .routine-item');
+    const eveningItems = document.querySelectorAll('#res-evening-list .routine-item');
+    const foundationItems = document.querySelectorAll('#res-foundation-box .routine-item');
+
+    // Populate prescription metadata
+    const now = new Date();
+    document.getElementById('rx-date-time').innerText =
+      now.toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) +
+      ' · ' + now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+
+    document.getElementById('rx-location-meta').innerText =
+      `📍 ${location} · ${weather} · ${humidity}% Humidity · ${temp}°C`;
+
+    // Score gauge
+    const rxScore = parseInt(scoreNum, 10) || 0;
+    document.getElementById('rx-score-num').innerText   = rxScore;
+    document.getElementById('rx-score-label').innerText = scoreLabel;
+
+    const rxCircle = document.getElementById('rx-circle-bar');
+    if (rxCircle) {
+      rxCircle.style.strokeDashoffset = '264';
+      setTimeout(() => {
+        rxCircle.style.strokeDashoffset = String(264 - (264 * rxScore / 100));
+      }, 120);
+    }
+
+    // Tags
+    document.getElementById('rx-skin-type-tag').innerText = `Skin: ${skinType}`;
+    document.getElementById('rx-condition-tag').innerText  = condition;
+    document.getElementById('rx-weather-tag').innerText    = weather;
+
+    // Environmental alert
+    document.getElementById('rx-env-title').innerText = envTitle;
+    document.getElementById('rx-env-desc').innerText  = envDesc;
+
+    // Morning routine list
+    const rxMorning = document.getElementById('rx-morning-list');
+    rxMorning.innerHTML = '';
+    morningItems.forEach(item => {
+      const stepTag  = item.querySelector('.routine-step-tag')?.innerText  || '';
+      const stepProd = item.querySelector('.routine-product-text')?.innerText || '';
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="rx-step-label">${stepTag}</span><span class="rx-step-product">${stepProd}</span>`;
+      rxMorning.appendChild(li);
+    });
+
+    // Evening routine list
+    const rxEvening = document.getElementById('rx-evening-list');
+    rxEvening.innerHTML = '';
+    eveningItems.forEach(item => {
+      const stepTag  = item.querySelector('.routine-step-tag')?.innerText  || '';
+      const stepProd = item.querySelector('.routine-product-text')?.innerText || '';
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="rx-step-label">${stepTag}</span><span class="rx-step-product">${stepProd}</span>`;
+      rxEvening.appendChild(li);
+    });
+
+    // Foundation match grid
+    const rxFoundGrid = document.getElementById('rx-foundation-grid');
+    rxFoundGrid.innerHTML = '';
+    foundationItems.forEach(item => {
+      const label = item.querySelector('.routine-step-tag')?.innerText  || '';
+      const val   = item.querySelector('.routine-product-text')?.innerText || '';
+      rxFoundGrid.innerHTML += `
+        <div class="rx-foundation-item">
+          <div class="rx-foundation-label">${label}</div>
+          <div class="rx-foundation-val">${val}</div>
+        </div>`;
+    });
+
+    // Open modal with animation
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+
+  // --- Print from Modal ---
+  btnConfirmPrint.addEventListener('click', () => {
+    window.print();
+  });
+
+  // --- Close Modal ---
+  function closeModal() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  btnClose.addEventListener('click', closeModal);
+
+  // Close on backdrop click
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
+  // Close on ESC key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
   });
 }

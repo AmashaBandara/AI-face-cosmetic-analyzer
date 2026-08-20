@@ -314,7 +314,7 @@
               <span>Modify Inputs / Retake</span>
             </button>
             
-            <button class="btn btn-primary" onclick="window.print();">
+            <button class="btn btn-primary" id="btn-print-prescription">
               <span>Print Beauty Prescription</span>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             </button>
@@ -341,6 +341,104 @@
       </div>
     </div>
   </footer>
+
+  <!-- Print Prescription Modal Overlay -->
+  <div class="print-modal-overlay" id="print-modal-overlay" role="dialog" aria-modal="true" aria-label="Print Beauty Prescription">
+    <div class="print-modal">
+      <!-- Modal Header Bar -->
+      <div class="print-modal-header">
+        <h3>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Beauty Prescription Preview
+        </h3>
+        <div class="print-modal-actions">
+          <button class="print-action-btn btn-confirm" id="btn-confirm-print">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Print Now
+          </button>
+          <button class="print-action-btn btn-close-modal" id="btn-close-print-modal">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Close
+          </button>
+        </div>
+      </div>
+
+      <!-- Prescription Document Body -->
+      <div class="print-modal-body">
+        <div id="print-prescription">
+          <!-- Prescription Header -->
+          <div class="rx-header">
+            <div class="rx-brand">
+              <div class="rx-brand-icon">✦</div>
+              <div>
+                <div class="rx-brand-name">Face Score AI</div>
+                <div class="rx-brand-sub">AI Cosmetic &amp; Skincare Recommendation System</div>
+              </div>
+            </div>
+            <div class="rx-meta">
+              <strong>Beauty Prescription</strong>
+              <span id="rx-date-time"></span><br>
+              <span id="rx-location-meta"></span>
+            </div>
+          </div>
+
+          <!-- Score Row -->
+          <div class="rx-score-row">
+            <div class="rx-score-circle">
+              <svg viewBox="0 0 100 100">
+                <circle fill="none" stroke="#F6E2E0" stroke-width="8" cx="50" cy="50" r="42"/>
+                <circle id="rx-circle-bar" fill="none" stroke="#D9695F" stroke-width="8" stroke-linecap="round"
+                  stroke-dasharray="264" stroke-dashoffset="264" cx="50" cy="50" r="42"
+                  style="transition: stroke-dashoffset 1s ease;"/>
+              </svg>
+              <div class="rx-score-overlay">
+                <span class="rx-score-num" id="rx-score-num">--</span>
+                <span class="rx-score-max">/ 100</span>
+              </div>
+            </div>
+            <div class="rx-score-info">
+              <h4>Face Score: <span id="rx-score-label" style="color:#D9695F;"></span></h4>
+              <div class="rx-score-tags">
+                <span class="rx-tag" id="rx-skin-type-tag"></span>
+                <span class="rx-tag" id="rx-condition-tag"></span>
+                <span class="rx-tag" id="rx-weather-tag"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Environmental Alert -->
+          <div class="rx-env-box">
+            <h5 id="rx-env-title"></h5>
+            <p id="rx-env-desc"></p>
+          </div>
+
+          <!-- Morning + Evening Routines -->
+          <div class="rx-routines-grid">
+            <div class="rx-routine-card morning">
+              <h5>☀ Morning Skincare Routine</h5>
+              <ul class="rx-step-list" id="rx-morning-list"></ul>
+            </div>
+            <div class="rx-routine-card evening">
+              <h5>🌙 Evening Repair Routine</h5>
+              <ul class="rx-step-list" id="rx-evening-list"></ul>
+            </div>
+          </div>
+
+          <!-- Foundation Match -->
+          <div class="rx-foundation-card">
+            <h5>✨ Cosmetic &amp; Foundation Match</h5>
+            <div class="rx-foundation-grid" id="rx-foundation-grid"></div>
+          </div>
+
+          <!-- Prescription Footer -->
+          <div class="rx-footer-bar">
+            <span class="rx-disclaimer">This prescription is AI-generated based on facial pixel analysis and environmental climate data. Consult a certified dermatologist for clinical advice.</span>
+            <span>Face Score AI &copy; 2026 — Amasha Bandara (2021/asp/59)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Toast Notification Alert -->
   <div class="toast-alert" id="toast-alert">System Ready</div>
